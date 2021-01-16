@@ -1,0 +1,15 @@
+<body>
+  <div class="row">
+    <p class='col-12'>Merchant Discounts</p>
+  </div>
+
+  <ul>
+    <% @merchant.discounts.each do |discount| %>
+      <li>
+        <%= link_to discount.name, merchant_discount_path(@merchant.id, discount.id) %>
+        <p>Percentage Discount: <%= discount.percentage_discount %></p>
+        <p>Quantity Threshold: <%= discount.quantity_threshold %></p>
+      </li>
+    <% end %>
+  </ul>
+</body>
