@@ -10,6 +10,7 @@ describe Merchant do
     it { should have_many(:customers).through(:invoices) }
     it { should have_many(:transactions).through(:invoices) }
     it { should have_many(:invoice_items).through(:items) }
+    it { should have_many(:discounts) }
   end
 
   describe "instance methods" do
