@@ -7,6 +7,10 @@ class DiscountsController < ApplicationController
   def new
   end
 
+  def show
+    @discount = @merchant.discounts.find_by_id(params[:id])
+  end
+
   def create
     @merchant.discounts.create!(discount_params)
     redirect_to merchant_discounts_path(@merchant.id)
