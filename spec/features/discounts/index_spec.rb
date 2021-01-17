@@ -24,5 +24,9 @@ describe 'As a merchant' do
     it "The discount name links to that discount's show page" do
       expect(page).to have_link(@discount_1.name, href: merchant_discount_path(@merchant_1.id, @discount_1.id))
     end
+
+    it 'I see a link to create a new discount that takes me to a form to add a new discount' do
+      expect(page).to have_link('Create New Discount', href: new_merchant_discount_path(@merchant_1.id))
+    end
   end
 end
