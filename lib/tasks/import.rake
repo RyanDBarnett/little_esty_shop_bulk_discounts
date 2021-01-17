@@ -1,81 +1,74 @@
 require 'csv'
 
-task :import, [:customers] => :environment do
-  CSV.foreach('db/data/customers.csv', headers: true) do |row|
-    Customer.create!(row.to_hash)
+def importCSV(path, model)
+  CSV.foreach(path, :headers => true) do |row|
+    model.constantize.create!(row.to_hash)
   end
-  ActiveRecord::Base.connection.reset_pk_sequence!('customers')
 end
 
-task :import, [:merchants] => :environment do
-  CSV.foreach('db/data/merchants.csv', headers: true) do |row|
-    Merchant.create!(row.to_hash)
+namespace :csv_load do
+  desc "Imports merchants csv file into database"
+  task :merchants => [:environment] do
+    file = "db/data/merchants.csv"
+    importCSV(file, 'Merchant')
   end
-  ActiveRecord::Base.connection.reset_pk_sequence!('merchants')
-end
 
-task :import, [:items] => :environment do
-  CSV.foreach('db/data/items.csv', headers: true) do |row|
-    Item.create!(row.to_hash)
+  desc "Imports customers csv file into database"
+  task :customers => [:environment] do
+    file_path = "db/data/customers.csv"
+    importCSV(file_path, 'Customer')
   end
-  ActiveRecord::Base.connection.reset_pk_sequence!('items')
-end
 
-task :import, [:invoices] => :environment do
-  CSV.foreach('db/data/invoices.csv', headers: true) do |row|
-    if row.to_hash['status'] == 'cancelled'
-      status = 0
-    elsif row.to_hash['status'] == 'in progress'
-      status = 1
-    elsif row.to_hash['status'] == 'completed'
-      status = 2
+  desc "Imports items csv file into database"
+  task :items => [:environment] do
+    file_path = "db/data/items.csv"
+    importCSV(file_path, 'Item')
+  end
+
+  desc "Imports invoices csv file into database"
+  task :invoices => [:environment] do
+    file_path = "db/data/invoices.csv"
+    importCSV(file_path, 'Invoice')
+  end
+
+  desc "Imports transactions csv file into database"
+  task :transactions => [:environment] do
+    file_path = "db/data/transactions.csv"
+    importCSV(file_path, 'Transaction')
+  end
+
+  desc "Imports invoice items csv file into database"
+  task :invoice_items => [:environment] do
+    file_path = "db/data/invoice_items.csv"
+    importCSV(file_path, 'InvoiceItem')
+  end
+
+  desc "Imports all csv files into database"
+  task :all do
+    tables = ['merchants', 'customers', 'invoices', 'transactions', 'items', 'invoice_items']
+    tables.each do |table|
+      Rake::Task["csv_load:#{table}"].invoke
     end
-    Invoice.create!({ id:          row[0],
-                      customer_id: row[1],
-                      merchant_id: row[2],
-                      status:      status,
-                      created_at:  row[4],
-                      updated_at:  row[5] })
+    Rake::Task["reset_sequences"].invoke
   end
-  ActiveRecord::Base.connection.reset_pk_sequence!('invoices')
 end
 
-task :import, [:transactions] => :environment do
-  CSV.foreach('db/data/transactions.csv', headers: true) do |row|
-    if row.to_hash['result'] == 'failed'
-      result = 0
-    elsif row.to_hash['result'] == 'success'
-      result = 1
+desc 'Resets Postgres auto-increment ID column sequences to fix duplicate ID errors'
+task :reset_sequences => :environment do
+  Rails.application.eager_load!
+  ActiveRecord::Base.descendants.each do |model|
+    unless model.attribute_names.include?('id')
+      Rails.logger.debug "Not resetting #{model}, which lacks an ID column"
+      next
     end
-    Transaction.create!({ id:                          row[0],
-                          invoice_id:                  row[1],
-                          credit_card_number:          row[2],
-                          credit_card_expiration_date: row[3],
-                          result:                      result,
-                          created_at:                  row[5],
-                          updated_at:                  row[6] })
-  end
-  ActiveRecord::Base.connection.reset_pk_sequence!('transactions')
-end
-
-task :import, [:invoice_items] => :environment do
-  CSV.foreach('db/data/invoice_items.csv', headers: true) do |row|
-    if row.to_hash['status'] == 'pending'
-      status = 0
-    elsif row.to_hash['status'] == 'packaged'
-      status = 1
-    elsif row.to_hash['status'] == 'shipped'
-      status = 2
+    begin
+      max_id = model.maximum(:id).to_i + 1
+      result = ActiveRecord::Base.connection.execute(
+        "ALTER SEQUENCE #{model.table_name}_id_seq RESTART #{max_id};"
+      )
+      Rails.logger.info "Reset #{model} sequence to #{max_id}"
+    rescue => e
+      Rails.logger.error "Error resetting #{model} sequence: #{e.class.name}/#{e.message}"
     end
-    InvoiceItem.create!({ id:          row[0],
-                          item_id:     row[1],
-                          invoice_id:  row[2],
-                          quantity:    row[3],
-                          unit_price:  row[4],
-                          status:      status,
-                          created_at:  row[6],
-                          updated_at:  row[7] })
   end
-  ActiveRecord::Base.connection.reset_pk_sequence!('invoice_items')
 end
-
