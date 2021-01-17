@@ -14,5 +14,9 @@ describe 'As a merchant' do
       expect(page).to have_content("Percentage Discount: #{@discount_1.percentage_discount}")
       expect(page).to have_content("Quantity Threshold: #{@discount_1.quantity_threshold}")
     end
+
+    it 'I see a link to edit the discount' do
+      expect(page).to have_link('Edit Discount', href: edit_merchant_discount_path(@merchant_1.id, @discount_1.id))
+    end
   end
 end
