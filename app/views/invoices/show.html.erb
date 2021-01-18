@@ -17,7 +17,7 @@
   <strong>Status: </strong><%= @invoice.status %><br/>
   <br>
 
-  <p> Created on: <%= @invoice.created_at.strftime("%A, %B %-d, %Y") %></p>
+  <p>Created on: <%= @invoice.created_at.strftime("%A, %B %-d, %Y") %></p>
   <p>Total Revenue: <%= @invoice.total_revenue %></p>
 
 
@@ -26,19 +26,20 @@
   <br>
   <br>
   <h4>Items on this Invoice:</h4>
-  <table class="table">
+  <table class="invoice-items-table">
     <thead>
       <tr class="tr">
         <th class="th1">Item Name</th>
         <th class="th1">Quantity</th>
         <th class="th1">Unit Price</th>
         <th class="th1">Status</th>
+        <th class="th1">Applied Discount</th>
       </tr>
     </thead>
 
     <tbody>
       <% @invoice.invoice_items.each do |i| %>
-        <tr class="tr">
+        <tr class="tr invoice-item-<%= i.id %>">
           <td style="text-align:center"><%= i.item.name %></td>
           <td style="text-align:center"><%= i.quantity %></td>
           <td style="text-align:center">$<%= i.unit_price %></td>
@@ -48,6 +49,12 @@
               <%= f.submit 'Update Invoice' %>
             <% end %>
           </td>
+          <% discount = i.find_discount %>
+          <% if discount %>
+            <td style="text-align:center"><%= link_to discount.name, merchant_discount_path(@merchant, discount) %></td>
+          <% else %>
+            <td>No Discount</td>
+          <% end %>
         </tr>
       <% end %>
     </tbody>
