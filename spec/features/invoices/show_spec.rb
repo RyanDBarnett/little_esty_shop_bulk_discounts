@@ -107,7 +107,7 @@ RSpec.describe 'invoices show' do
       visit merchant_invoice_path(@merchant_1, @invoice_1)
 
       within ".invoice-item-#{@ii_1.id}" do
-        expect(page).to have_link(@discount_1.name)
+        expect(page).to have_link(@discount_1.name, href: merchant_discount_path(@merchant_1, @discount_1))
       end
 
       within ".invoice-item-#{@ii_2.id}" do
