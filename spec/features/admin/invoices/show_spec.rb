@@ -47,7 +47,7 @@ describe 'Admin Invoices Index Page' do
 
     expect(page).to have_content(@ii_1.status)
     expect(page).to have_content(@ii_2.status)
-    
+
     expect(page).to_not have_content(@ii_3.quantity)
     expect(page).to_not have_content("$#{@ii_3.unit_price}")
     expect(page).to_not have_content(@ii_3.status)
@@ -57,6 +57,29 @@ describe 'Admin Invoices Index Page' do
     expect(page).to have_content("Total Revenue: $#{@i1.total_revenue}")
 
     expect(page).to_not have_content(@i2.total_revenue)
+  end
+
+  describe 'when there are discounts' do
+    it 'I see that the total revenue includes discounts in the calculation' do
+      @merchant_1 = Merchant.create!(name: 'Hair Care')
+      @item_1 = @merchant_1.items.create!(name: "Shampoo", description: "This washes your hair", unit_price: 10, status: 1)
+      @item_2 = @merchant_1.items.create!(name: "Butterfly Clip", description: "This holds up your hair but in a clip", unit_price: 5)
+      @customer_1 = Customer.create!(first_name: 'Joey', last_name: 'Smith')
+      @invoice_1 = Invoice.create!(merchant_id: @merchant_1.id, customer_id: @customer_1.id, status: 2, created_at: "2012-03-27 14:54:09")
+      @ii_1 = InvoiceItem.create!(invoice_id: @invoice_1.id, item_id: @item_1.id, quantity: 10, unit_price: 10, status: 2)
+      @ii_2 = InvoiceItem.create!(invoice_id: @invoice_1.id, item_id: @item_2.id, quantity: 1, unit_price: 10, status: 1)
+      @discount_1 = @merchant_1.discounts.create!(name: '20% Off 10 Items', percentage_discount: 20.0, quantity_threshold: 10)
+
+      visit admin_invoice_path(@invoice_1)
+
+      expect(page).to have_content("Total Revenue: $90")
+
+      @discount_2 = @merchant_1.discounts.create!(name: '50% Off 10 Items', percentage_discount: 50.0, quantity_threshold: 10)
+
+      visit admin_invoice_path(@invoice_1)
+
+      expect(page).to have_content("Total Revenue: $60")
+    end
   end
 
   it 'should have status as a select field that updates the invoices status' do
