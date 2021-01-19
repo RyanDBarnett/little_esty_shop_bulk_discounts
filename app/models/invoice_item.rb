@@ -24,7 +24,7 @@ class InvoiceItem < ApplicationRecord
   def apply_discount
     discount = self.find_discount
     if discount
-      self.update!(unit_price: discount.calc_discount(item.unit_price))
+      self.update!(unit_price: discount.calc_discounted_item_unit_price(item.unit_price))
     else
       self
     end
