@@ -11,7 +11,7 @@
         <%= link_to discount.name, merchant_discount_path(@merchant.id, discount.id) %>
         <p>Percentage Discount: <%= discount.percentage_discount %></p>
         <p>Quantity Threshold: <%= discount.quantity_threshold %></p>
-        <%= link_to 'Delete', merchant_discount_path(@merchant.id, discount.id), :method => :delete %>
+        <%= link_to 'Delete', merchant_discount_path(@merchant.id, discount.id), method: :delete, remote: false %>
       </li>
     <% end %>
   </ul>
