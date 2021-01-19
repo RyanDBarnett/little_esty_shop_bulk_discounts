@@ -31,18 +31,18 @@ describe 'As a merchant' do
 
     it 'next to each bulk discount I see a link to delete it' do
       within "#discount-#{ @discount_1.id }-container" do
-        expect(page).to have_link('Delete', href: merchant_discount_path(@merchant_1.id, @discount_1.id))
+        expect(page).to have_button('Delete')
       end
 
       within "#discount-#{ @discount_2.id }-container" do
-        expect(page).to have_link('Delete', href: merchant_discount_path(@merchant_1.id, @discount_2.id))
+        expect(page).to have_button('Delete')
       end
     end
 
     describe "When I click a Discount's Delete link" do
       before :each do
         within "#discount-#{ @discount_2.id }-container" do
-          click_link('Delete')
+          click_button('Delete')
         end
       end
 
