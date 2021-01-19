@@ -70,8 +70,7 @@ RSpec.describe InvoiceItem, type: :model do
 
         @invoice_item_1.apply_discount
 
-        discount_amount = @invoice_item_1.item.unit_price * @discount_1.percentage_discount * 0.01
-        expected_unit_price_1 = @invoice_item_1.item.unit_price - discount_amount
+        expected_unit_price_1 = @discount_1.calc_discounted_item_unit_price(@item_1.unit_price)
 
         expected_unit_price_2 = @invoice_item_2.item.unit_price
 
@@ -91,16 +90,16 @@ RSpec.describe InvoiceItem, type: :model do
           @invoice_item_1.apply_discount
           @invoice_item_2.apply_discount
 
-          expect(@invoice_item_1.unit_price).to eq(@discount_1.calc_discount(@item_1.unit_price))
-          expect(@invoice_item_2.unit_price).to eq(@discount_2.calc_discount(@item_2.unit_price))
+          expect(@invoice_item_1.unit_price).to eq(@discount_1.calc_discounted_item_unit_price(@item_1.unit_price))
+          expect(@invoice_item_2.unit_price).to eq(@discount_2.calc_discounted_item_unit_price(@item_2.unit_price))
 
           @discount_2.update!(name: '15% Off 15 Items', percentage_discount: 15.0, quantity_threshold: 15)
 
           @invoice_item_1.apply_discount
           @invoice_item_2.apply_discount
 
-          expect(@invoice_item_1.unit_price).to eq(@discount_1.calc_discount(@item_1.unit_price))
-          expect(@invoice_item_2.unit_price).to eq(@discount_1.calc_discount(@item_2.unit_price))
+          expect(@invoice_item_1.unit_price).to eq(@discount_1.calc_discounted_item_unit_price(@item_1.unit_price))
+          expect(@invoice_item_2.unit_price).to eq(@discount_1.calc_discounted_item_unit_price(@item_2.unit_price))
         end
 
         it "should not apply this merchant's discounts to another merchant's items" do
@@ -116,8 +115,8 @@ RSpec.describe InvoiceItem, type: :model do
           @invoice_item_2.apply_discount
           @invoice_item_3.apply_discount
 
-          expect(@invoice_item_1.unit_price).to eq(@discount_1.calc_discount(@item_1.unit_price))
-          expect(@invoice_item_2.unit_price).to eq(@discount_2.calc_discount(@item_2.unit_price))
+          expect(@invoice_item_1.unit_price).to eq(@discount_1.calc_discounted_item_unit_price(@item_1.unit_price))
+          expect(@invoice_item_2.unit_price).to eq(@discount_2.calc_discounted_item_unit_price(@item_2.unit_price))
           expect(@invoice_item_3.unit_price).to eq(@item_3.unit_price)
         end
       end

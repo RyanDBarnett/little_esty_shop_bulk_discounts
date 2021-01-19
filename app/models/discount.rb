@@ -5,7 +5,7 @@ class Discount < ApplicationRecord
 
   belongs_to :merchant
 
-  def calc_discount unit_price
+  def calc_discounted_item_unit_price unit_price
     unit_price - unit_price * self.percentage_discount * 0.01
   end
 end
