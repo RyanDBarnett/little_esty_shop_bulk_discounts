@@ -3,5 +3,5 @@
     <p class='col-12'>New Merchant Discount Form</p>
   </div>
 
-  <%= render partial: 'form', locals: { model: Discount.new } %>
+  <%= render partial: 'form', locals: { model: Discount.new, url: merchant_discounts_path(@merchant.id) } %>
 </body>
